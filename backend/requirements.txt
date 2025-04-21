@@ -1,5 +1,5 @@
 fastapi
-uvicorn[standard]
+uvicorn
+psutil
+python-multipart
 openstudio
-pydantic
-
