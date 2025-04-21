@@ -36,3 +36,18 @@
     transform: rotate(360deg);
   }
 }
+
+
+/* Add these if not present */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.progress-bar {
+  transition: width 0.3s ease;
+}
+
+.file-input-label:hover {
+  background-color: #f8f9fa;
+}
