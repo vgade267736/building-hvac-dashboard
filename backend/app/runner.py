@@ -5,12 +5,17 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-def run_simulation(
-    idf_path: str,
-    tmp_dir: str,
-    weather_path: str,
-    energyplus_path: str | None = None,
-) -> str:
+# codex/add-function-docstrings-and-refine-exceptions
+def run_simulation(idf_path: str, tmp_dir: str, weather_path: str) -> str:
+    """Run EnergyPlus on the provided IDF and return the output directory."""
+
+# def run_simulation(
+#     idf_path: str,
+#     tmp_dir: str,
+#     weather_path: str,
+#     energyplus_path: str | None = None,
+# ) -> str:
+main
     try:
         exe = energyplus_path or os.getenv("ENERGYPLUS_PATH", "/usr/local/bin/energyplus")
 
@@ -69,5 +74,5 @@ def run_simulation(
 
     except subprocess.TimeoutExpired:
         raise Exception("EnergyPlus timed out after 5 minutes")
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         raise Exception(f"Simulation failed: {e}")
