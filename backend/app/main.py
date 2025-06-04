@@ -118,34 +118,39 @@ async def get_results(run_id: str):
         )
 
     try:
-        with open(csv_file, "r") as f:
-            content = f.read()
-            if not content:
+        # Use csv.DictReader to robustly parse the CSV including quoted values
+        with open(csv_file, newline="") as f:
+            reader = csv.DictReader(f)
+
+            # Ensure file is not empty and headers are present
+            if not reader.fieldnames:
                 raise HTTPException(
                     status_code=500,
                     detail="CSV file is empty"
                 )
 
-            # Parse CSV content
-            lines = content.splitlines()
-            headers = lines[0].split(',')
-            data = []
-            
             # Find relevant columns dynamically
-            temp_col = next((h for h in headers if "Temperature" in h), None)
-            time_col = next((h for h in headers if "Date/Time" in h), None)
+            temp_col = next((h for h in reader.fieldnames if "Temperature" in h), None)
+            time_col = next((h for h in reader.fieldnames if "Date/Time" in h), None)
 
             if not temp_col or not time_col:
                 raise HTTPException(
                     status_code=500,
-                    detail=f"Required columns not found. Available headers: {headers}"
+                    detail=f"Required columns not found. Available headers: {reader.fieldnames}"
                 )
 
-            for line in lines[1:]:
-                values = line.split(',')
+            data = []
+            for row in reader:
+                try:
+                    value = float(row[temp_col])
+                except (ValueError, KeyError) as e:
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Error parsing CSV data: {e}"
+                    )
                 data.append({
-                    "time": values[headers.index(time_col)],
-                    "value": float(values[headers.index(temp_col)])
+                    "time": row[time_col],
+                    "value": value
                 })
 
             return {"data": data}
