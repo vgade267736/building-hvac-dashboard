@@ -1,16 +1,25 @@
+import os
 import subprocess
 import logging
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-def run_simulation(idf_path: str, tmp_dir: str, weather_path: str) -> str:
+def run_simulation(
+    idf_path: str,
+    tmp_dir: str,
+    weather_path: str,
+    energyplus_path: str | None = None,
+) -> str:
     try:
+        exe = energyplus_path or os.getenv("ENERGYPLUS_PATH", "/usr/local/bin/energyplus")
+
         version_result = subprocess.run(
-            ["/usr/local/bin/energyplus", "--version"],
+            [exe, "--version"],
             capture_output=True,
             text=True
         )
+        logger.info(f"Using EnergyPlus executable: {exe}")
         logger.info(f"EnergyPlus version: {version_result.stdout.strip()}")
 
         for path in [idf_path, weather_path]:
@@ -20,7 +29,7 @@ def run_simulation(idf_path: str, tmp_dir: str, weather_path: str) -> str:
         Path(tmp_dir).mkdir(parents=True, exist_ok=True)
 
         cmd = [
-            "/usr/local/bin/energyplus",
+            exe,
             "-w", str(weather_path),
             "-d", str(tmp_dir),
             "-r",

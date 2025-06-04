@@ -5,10 +5,11 @@ This project contains a minimal FastAPI backend used to run EnergyPlus simulatio
 ## Prerequisites
 
 - **Python 3.10** (the OpenStudio bindings were built for this version)
-- **EnergyPlus** installed and available as `/usr/local/bin/energyplus`. This typically
-  comes from the [OpenStudio](https://github.com/NREL/OpenStudio/releases) or
-  [EnergyPlus](https://energyplus.net/download) distributions. Make sure the
-  executable is on your `PATH` or create a symlink to `/usr/local/bin/energyplus`.
+* **EnergyPlus** installed. By default the backend expects the executable at
+  `/usr/local/bin/energyplus` (as provided by the
+  [OpenStudio](https://github.com/NREL/OpenStudio/releases) or
+  [EnergyPlus](https://energyplus.net/download) distributions). You can override
+  this location using the `ENERGYPLUS_PATH` environment variable.
 - **OpenStudio Python bindings** – installed via `pip install openstudio` (see
   `backend/requirements.txt`).
 
