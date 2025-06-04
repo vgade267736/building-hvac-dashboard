@@ -33,6 +33,7 @@ async def simulate(
     width:  float | None = Form(default=None),
     height: float | None = Form(default=None),
 ):
+    """Run a simulation by saving inputs and queuing EnergyPlus."""
     run_id = str(uuid.uuid4())
     tmp_dir = f"/tmp/{run_id}"
     os.makedirs(tmp_dir, exist_ok=True)
@@ -43,7 +44,7 @@ async def simulate(
     try:
         with open(weather_path, "wb") as f:
             f.write(await weather_file.read())
-    except Exception as e:
+    except OSError as e:
         logger.error(f"Saving weather file failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -51,7 +52,7 @@ async def simulate(
         try:
             with open(idf_path, "wb") as f:
                 f.write(await idf_file.read())
-        except Exception as e:
+        except OSError as e:
             logger.error(f"Saving uploaded IDF failed: {e}")
             raise HTTPException(status_code=500, detail=str(e))
     else:
@@ -77,7 +78,7 @@ async def simulate(
 
             workspace.save(openstudio.toPath(idf_path), True)
 
-        except Exception as e:
+        except (RuntimeError, OSError) as e:
             logger.error(f"IDF generation error: {e}")
             raise HTTPException(status_code=500, detail=str(e))
 
@@ -86,6 +87,7 @@ async def simulate(
 
 @app.get("/results/{run_id}")
 async def get_results(run_id: str):
+    """Return parsed results for the given run ID."""
     results_dir = os.path.join("/tmp", run_id)
     csv_file = os.path.join(results_dir, "eplusout.csv")
     err_file = os.path.join(results_dir, "eplusout.err")
@@ -148,7 +150,7 @@ async def get_results(run_id: str):
 
             return {"data": data}
 
-    except Exception as e:
+    except (OSError, ValueError) as e:
         raise HTTPException(
             status_code=500,
             detail=f"Error processing results: {str(e)}"
@@ -156,6 +158,7 @@ async def get_results(run_id: str):
     
 @app.get("/status")
 async def status():
+    """Report currently running EnergyPlus processes."""
     procs = [
         p.info for p in psutil.process_iter(attrs=["name"])
         if "energyplus" in (p.info["name"] or "").lower()

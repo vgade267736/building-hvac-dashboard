@@ -1,6 +1,7 @@
 import openstudio
 
 def build_model(defn: dict) -> openstudio.model.Model:
+    """Construct a simple OpenStudio model using the provided parameters."""
     L, W, H = defn["dimensions"]
     weather_path = defn.get("weather_path")
 
